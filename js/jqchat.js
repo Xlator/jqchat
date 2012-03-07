@@ -148,7 +148,7 @@ $(document).ready(function() {
 			regform.show().children('.submit').on('click', function(e) {
 				e.preventDefault();
 				nick = $('input.regnick').val();
-				if(Chat.validatenick(nick)) {
+				if(Chat.validateNick(nick)) {
 					$('input.nick').val(nick);
 					$('div#autoupdate').children('input[type=checkbox]').click();
 					Chat.autoupdate("start");
