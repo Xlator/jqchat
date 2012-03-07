@@ -1,0 +1,146 @@
+@mixin clearfix() {
+	zoom:1;
+	&:before, &:after {
+		content: "\0020";
+		display: block;
+		height: 0;
+		overflow: hidden;
+	}
+	&:after {
+		clear: both;
+	}
+}
+
+div, header, form {
+	// display: none;
+}
+
+div.loading { 
+	background-image: url("../loading.gif");
+	background-repeat: no-repeat;
+	background-position: center;
+	// display:block !important;
+	display:none;
+	width: inherit;
+	height: inherit;
+}
+
+body {
+	font-size: 12px;
+	font-family: monospace;
+	width: 65em;
+	height: 30em;
+	margin: 100px auto;
+	background: #FFF;
+	color: #333;
+}
+
+div#autoupdate {
+	width: inherit;
+	height: 2em;
+	input, label { display: inline; margin:0; padding: 0; float: right;}
+	label { margin-right: 0.4em; }
+	input { margin-top: -0.2em;}
+	background: #FFF;
+	@include clearfix();
+}
+
+header#topic {
+	background: black;
+	color: white;
+	padding: 0.2em 0;
+	&:before {
+		content: "Topic : ";
+		color: #999;
+		margin-left: 2em;
+	}
+}
+
+div#chatarea {
+	background: #FFF;
+	width:inherit;
+	height: inherit;
+	overflow-y: auto;
+	border: 1px solid #333;
+}
+ul {
+	list-style: none;
+	margin:1em 1em;
+	padding:0;
+}
+li {
+	line-height: 1.3;
+	margin:0;
+	padding:0.1em 0.5em;
+	&.date {
+		color: #666;
+		border-bottom: 1px solid #666;
+		margin-top:1em;
+	}
+	&.status {
+		color: #666;
+		font-style: italic;
+	}
+	span {
+		margin:0;
+		display:inline-block;
+		vertical-align: top;
+		&.time {
+			width:5em;
+			margin-right: 0em;
+		}
+		&.nick {
+			width: 7em;
+			text-align: right;
+			margin-right: 1em;
+		}
+	}
+	p {
+		display: inline-block;
+		width: 45em;
+		margin:0;
+		padding:0;
+	}
+
+}
+
+form#register {
+	margin-top: 13em;
+	margin-left: 11em;
+	input {
+		font-size: 24px;
+	}
+	display:none;
+}
+
+form#chatcontrols {
+	input {
+		font-size: 12px;
+		font-family: monospace;
+		margin-top:1em;
+		border:0;
+		height: 1.4em;
+		padding: 0.2em 0.2em;
+		float:left;
+		background: #DDD;
+		&.message {
+			width: 48em;
+			margin-left: 1em;
+		}
+		&.nick {
+			width: 6.2em;
+		}
+		&.submit {
+			width: 8em;
+			float:right;
+			border:0;
+			height: 1.8em;
+			&:active { 
+				background: #FF0;
+			}
+			&[disabled] {
+				background: #EEE;
+			}
+		}
+	}
+}

@@ -1,0 +1,118 @@
+div.loading {
+  background-image: url("../loading.gif");
+  background-repeat: no-repeat;
+  background-position: center;
+  display: none;
+  width: inherit;
+  height: inherit; }
+
+body {
+  font-size: 12px;
+  font-family: monospace;
+  width: 65em;
+  height: 30em;
+  margin: 100px auto;
+  background: #FFF;
+  color: #333; }
+
+div#autoupdate {
+  width: inherit;
+  height: 2em;
+  background: #FFF;
+  zoom: 1; }
+  div#autoupdate input, div#autoupdate label {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    float: right; }
+  div#autoupdate label {
+    margin-right: 0.4em; }
+  div#autoupdate input {
+    margin-top: -0.2em; }
+  div#autoupdate:before, div#autoupdate:after {
+    content: "\0020";
+    display: block;
+    height: 0;
+    overflow: hidden; }
+  div#autoupdate:after {
+    clear: both; }
+
+header#topic {
+  background: black;
+  color: white;
+  padding: 0.2em 0; }
+  header#topic:before {
+    content: "Topic : ";
+    color: #999;
+    margin-left: 2em; }
+
+div#chatarea {
+  background: #FFF;
+  width: inherit;
+  height: inherit;
+  overflow-y: auto;
+  border: 1px solid #333; }
+
+ul {
+  list-style: none;
+  margin: 1em 1em;
+  padding: 0; }
+
+li {
+  line-height: 1.3;
+  margin: 0;
+  padding: 0.1em 0.5em; }
+  li.date {
+    color: #666;
+    border-bottom: 1px solid #666;
+    margin-top: 1em; }
+  li.status {
+    color: #666;
+    font-style: italic; }
+  li span {
+    margin: 0;
+    display: inline-block;
+    vertical-align: top; }
+    li span.time {
+      width: 5em;
+      margin-right: 0em; }
+    li span.nick {
+      width: 7em;
+      text-align: right;
+      margin-right: 1em; }
+  li p {
+    display: inline-block;
+    width: 45em;
+    margin: 0;
+    padding: 0; }
+
+form#register {
+  margin-top: 13em;
+  margin-left: 11em;
+  display: none; }
+  form#register input {
+    font-size: 24px; }
+
+form#chatcontrols input {
+  font-size: 12px;
+  font-family: monospace;
+  margin-top: 1em;
+  border: 0;
+  height: 1.4em;
+  padding: 0.2em 0.2em;
+  float: left;
+  background: #DDD; }
+  form#chatcontrols input.message {
+    width: 48em;
+    margin-left: 1em; }
+  form#chatcontrols input.nick {
+    width: 6.2em; }
+  form#chatcontrols input.submit {
+    width: 8em;
+    float: right;
+    border: 0;
+    height: 1.8em; }
+    form#chatcontrols input.submit:active {
+      background: #FF0; }
+    form#chatcontrols input.submit[disabled] {
+      background: #EEE; }
