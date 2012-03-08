@@ -90,8 +90,8 @@ function getNicks() { // Returns array of nicks (except our own)
 	return $nicks;
 }
 
-function nickAvailable($nick,$nicks) { // Takes nick and nick list, returns true if our chosen nick is available
-	return (bool) !array_search($nick,$nicks);
+function nickAvailable($nick) { // Takes nick and nick list, returns true if our chosen nick is available
+	return !dbResultExists("SELECT nick FROM sessions WHERE nick = '$nick' AND sessionid !='".session_id()."'");
 }
 
 function sessionExists($sessionid) {
@@ -116,11 +116,13 @@ function getMsgs($lastseen) { // Takes the ID of the last seen post, returns arr
 
 // If the log was empty, insert a blank row to avoid losing the first result when comparing dates.
 	if($lastseen == -1) 
-		$blank = "UNION SELECT '','','','' ORDER BY id";
+		$blank = "UNION SELECT '','','',''";
 	else
 		$blank = "";
 
-	return dbResultArray("SELECT * FROM chatlog WHERE id >= $lastseen $blank");
+	return dbResultArray("SELECT * FROM (
+		SELECT * FROM chatlog WHERE id >= $lastseen ORDER BY id DESC LIMIT 0,".MAX_POSTS."
+	) AS x $blank ORDER BY id ASC"); // Only select the last MAX_POSTS posts (defined in config.php)
 }
 
 function postMsg($nick, $message) {

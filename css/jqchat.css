@@ -3,8 +3,8 @@ div.loading {
   background-repeat: no-repeat;
   background-position: center;
   display: none;
-  width: inherit;
-  height: inherit; }
+  width: 98%;
+  height: 90%; }
 
 body {
   font-size: 12px;
@@ -38,18 +38,19 @@ div#autoupdate {
     clear: both; }
 
 header#topic {
+  min-width: 63.2em;
   background: black;
   color: white;
-  padding: 0.2em 0; }
+  padding: 0.2em 1em; }
   header#topic:before {
-    content: "Topic : ";
+    content: "Topic: ";
     color: #999;
     margin-left: 2em; }
 
 div#chatarea {
   background: #FFF;
   width: inherit;
-  height: inherit;
+  height: 360px;
   overflow-y: auto;
   border: 1px solid #333; }
 
@@ -93,6 +94,11 @@ form#register {
   display: none; }
   form#register input {
     font-size: 24px; }
+  form#register label.regerror {
+    display: block;
+    margin-top: 1em;
+    color: red;
+    font-size: 1.3em; }
 
 form#chatcontrols input {
   font-size: 12px;
@@ -108,12 +114,32 @@ form#chatcontrols input {
     margin-left: 1em; }
   form#chatcontrols input.nick {
     width: 6.2em; }
+  form#chatcontrols input.invalidNick {
+    border: 1px solid red; }
   form#chatcontrols input.submit {
+    zoom: 1;
     width: 8em;
     float: right;
     border: 0;
     height: 1.8em; }
+    form#chatcontrols input.submit:before, form#chatcontrols input.submit:after {
+      content: "\0020";
+      display: block;
+      height: 0;
+      overflow: hidden; }
+    form#chatcontrols input.submit:after {
+      clear: both; }
     form#chatcontrols input.submit:active {
       background: #FF0; }
     form#chatcontrols input.submit[disabled] {
       background: #EEE; }
+
+span.nickerror {
+  color: red;
+  background: #000;
+  display: none;
+  position: relative;
+  top: 0.4em;
+  left: -6.8em;
+  font-size: 1em;
+  height: 0; }

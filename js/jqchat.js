@@ -1,3 +1,24 @@
+$.fn.scrollBottom = function()
+{
+	$(this).scrollTop($(this).prop('scrollHeight') - $(this).height());
+	return($(this));
+} 
+
+String.prototype.validateNick = function() {
+	return Boolean(this.match(/^[A-Za-z0-9\-_^]{3,10}$/));
+}
+
+String.prototype.nickAvailable = function() {
+	return Boolean($.inArray(this.toString(), Chat.nicks) === -1);
+}
+
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+	var rest = this.slice((to || from) + 1 || this.length);
+	this.length = from < 0 ? this.length + from : from;
+	return this.push.apply(this, rest);
+}
+
 $(document).ready(function() {
 
 // Set up defaults for AJAX requests
@@ -18,13 +39,15 @@ $(document).ready(function() {
 					}, 2000);
 
 				if(messagebox.val().length == 0) {
-					submit.val("Send").prop("disabled",true);
+					Chat.submitConditions("noTextAuto", "on");
 				}
+				submit.val("Send");
 			}
 
 			if(mode == "stop") {
 				clearInterval(Chat.autoupdateloop);
-				submit.prop("disabled",false);
+
+				Chat.submitConditions("noTextAuto", "off");
 				if(messagebox.val().length == 0) // Fix the submit button text situationally
 					submit.val("Update");
 
@@ -63,6 +86,7 @@ $(document).ready(function() {
 
 			if(nick == "" && Chat.lastseen == -1) {
 				Chat.register();
+				return;
 			}
 
 			else // Remove the registration form if it is showing
@@ -87,10 +111,10 @@ $(document).ready(function() {
 
 // ### Message insertion method			
 		insert: function(response) {
-
+			Chat.nicks = response.nicks;
 			if(response.errors.nick) { // If the AJAX request returned any errors...
 				nickbox.val(""); 
-				// alert(response.errors.nick);
+				alert(response.errors.nick);
 				return false;
 			}
 
@@ -129,15 +153,18 @@ $(document).ready(function() {
 
 			if(Chat.mode != "auto") { // If we aren't auto-refreshing
 				submit.val("Update"); // Reset the submit button text
-				chatarea.prop('scrollTop',chatarea.prop('scrollHeight')); // Scroll to the bottom
+				// chatarea.prop('scrollTop',chatarea.prop('scrollHeight')); // Scroll to the bottom
 				if(Chat.message != "") { // Clear the message input box after submission
 					messagebox.val("");
 				}
+				chatarea.scrollBottom();
 			}
 			if(Chat.lastseen == -1) { // Remove the loading screen and show the content on page load
 				$('body').children().show();
 				$('div.loading').remove();	
 			}
+			if(Chat.autoscroll)
+				chatarea.scrollBottom();
 		},
 
 // ### Chat line builder method
@@ -155,24 +182,71 @@ $(document).ready(function() {
 
 // ### Chat registration/login method
 		register: function() {
-			var forms = $('form').add('#autoupdate').hide(),
-				regform = $('form#register');
+			Chat.autoupdate("stop");
+			Chat.send().done(function(response) { Chat.nicks = response.nicks; })
 
-			regform.show().children('.submit').on('click', function(e) {
+			var forms = $('form#chatcontrols').hide(),
+				regform = $('form#register');
+			$('label.regerror').hide();
+			regform.show().children('.regsubmit').on('click', function(e) {
 				e.preventDefault();
 				nick = $('input.regnick').val();
-				if(Chat.validateNick(nick)) {
+
+				if(!nick.validateNick()) {
+					$('label.regerror').hide();
+					$('label[name=regInvalidNick]').show();
+				}	
+
+				else if(!nick.nickAvailable()) {
+					$('label.regerror').hide();
+					$('label[name=regNickTaken]').show();
+				}
+
+				else {
+					$(this).parent().hide();
+					$('div.loading').show();
 					$('input.nick').val(nick);
-					$('div#autoupdate').children('input[type=checkbox]').click();
-					Chat.autoupdate("start");
+					if($('input.autobox').prop('checked') == true) 
+						Chat.autoupdate("start");
 					forms.show();	
 				}
 			});
 		},
-		validateNick: function(nick) {
-			return Boolean(nick.match(/^[A-Za-z0-9\-_^]{3,10}$/));
-		}
-	}	
+		
+		submitConditions: function(condition, action) {
+			if(!Chat.conditionSwitch) { Chat.conditionSwitch = new Array; }
+			submit = $('input.submit');
+			if(Chat.conditionSwitch.length > 0) {
+				for(i=0;i<Chat.conditionSwitch.length;i++) {
+					if(Chat.conditionSwitch[i] == condition) {	
+
+						if(action == "off") {
+							console.log("Submit conditions: " +condition + " off");
+							Chat.conditionSwitch.remove(i);
+							if(Chat.conditionSwitch.length == 0)
+								submit.prop('disabled', false);
+							return true;
+						}
+
+						else if(action == "on") {
+							console.log("Submit conditions: " +condition + " already on");
+							return false;
+						}
+					}
+				}
+			}
+			if(action == "on") {
+				console.log("Submit conditions: " +condition + " on");
+				Chat.conditionSwitch.push(condition);
+				submit.prop('disabled',true);
+				return true;
+			}
+			else if(action == "off") {
+				console.log("Submit conditions: " +condition + " already off");
+				return false;
+			}
+		},
+	}
 
 
 	// Input fields
@@ -182,15 +256,18 @@ $(document).ready(function() {
 		autobox = $('div#autoupdate').children('input[type=checkbox]'),
 		chatarea = $('div#chatarea');
 	
+	$('span.nickerror').hide();
+		
 	// Message history for this session
 	window.myMessages = new Array;
 	window.myMsgIndex = -1;
 
-	Chat.update();
 	
-	if(autobox.prop('checked') == true) {
+	if(autobox.prop('checked') == true)
 		Chat.autoupdate("start");
-	}
+	
+	else
+		Chat.update();
 
 	autobox.on('click', function(e) {
 		if($(this).prop('checked') == true) {
@@ -210,12 +287,12 @@ $(document).ready(function() {
 		if($(this).val().length > 0) { 
 			submit.val("Send"); 
 			if(autobox.prop('checked') == true) {
-				submit.prop('disabled',false);
+				Chat.submitConditions("noTextAuto", "off");
 			}
 		}
 		else { 
 			if(autobox.prop('checked') == true) {
-				submit.prop('disabled',true);
+				Chat.submitConditions("noTextAuto", "on");
 			}
 			else {submit.val("Update"); }
 		}
@@ -242,6 +319,35 @@ $(document).ready(function() {
 			}
 		}
 	});
+	
+	nickbox.on('focus', function(e) {
+		Chat.oldnick = $(this).val(); // Store old nick to revert to if new is invalid
+		console.log(Chat.oldnick);
+	})
+	.on('blur', function(e) {
+		$this = $(this);
+		$('span.nickerror').css('display','block').hide();
+		if(!$this.val().validateNick()) {
+			$this.addClass("invalidNick");
+			$('span[name=invalidNick]').show();
+			Chat.submitConditions("invalidNick", "on");
+		}
+		else if(!$this.val().nickAvailable()) {
+			$this.addClass("invalidNick");
+			$('span[name=nickTaken]').show();
+			Chat.submitConditions("invalidNick", "on");
+		}
+		else {
+			$this.removeClass("invalidNick");
+			Chat.submitConditions("invalidNick", "off");
+		}
+	});
+
+	Chat.autoscroll = true;
+	chatarea.on('scroll', function() {
+		$this = $(this);
+		Chat.autoscroll = Boolean($this.scrollTop() > $this.prop('scrollHeight') - $this.height() - 25);
+	})
 
 // ### Delete session on browser/tab close or leaving the page
 	$(window).on('unload', function() { 

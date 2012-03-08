@@ -21,8 +21,8 @@ div.loading {
 	background-position: center;
 	// display:block !important;
 	display:none;
-	width: inherit;
-	height: inherit;
+	width: 98%;
+	height: 90%;
 }
 
 body {
@@ -46,11 +46,14 @@ div#autoupdate {
 }
 
 header#topic {
+	min-width: 63.2em;
+
 	background: black;
 	color: white;
-	padding: 0.2em 0;
+	padding: 0.2em 1em;
+
 	&:before {
-		content: "Topic : ";
+		content: "Topic: ";
 		color: #999;
 		margin-left: 2em;
 	}
@@ -59,7 +62,7 @@ header#topic {
 div#chatarea {
 	background: #FFF;
 	width:inherit;
-	height: inherit;
+	height: 360px;
 	overflow-y: auto;
 	border: 1px solid #333;
 }
@@ -112,9 +115,16 @@ form#register {
 		font-size: 24px;
 	}
 	display:none;
+	label.regerror { 
+		display: block;
+		margin-top: 1em;
+		color: red;
+		font-size: 1.3em;
+	}
 }
 
 form#chatcontrols {
+		
 	input {
 		font-size: 12px;
 		font-family: monospace;
@@ -131,7 +141,11 @@ form#chatcontrols {
 		&.nick {
 			width: 6.2em;
 		}
+		&.invalidNick {
+			border: 1px solid red;
+		}
 		&.submit {
+			@include clearfix();
 			width: 8em;
 			float:right;
 			border:0;
@@ -144,4 +158,15 @@ form#chatcontrols {
 			}
 		}
 	}
+}
+
+span.nickerror {
+	color: red;
+	background:#000;
+	display:none;
+	position: relative;
+	top: 0.4em;
+	left: -6.8em;
+	font-size: 1em;
+	height:0;
 }
