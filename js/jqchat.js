@@ -12,16 +12,22 @@ $(document).ready(function() {
 // ### Auto-update method		
 		autoupdate: function(mode) {
 			if(mode == "start") { 
-				Chat.autoupdateloop = setInterval(function() { Chat.update("auto"); }, 2000); 
+				Chat.autoupdateloop = setInterval(
+					function() { 
+						Chat.update("auto"); 
+					}, 2000);
+
 				if(messagebox.val().length == 0) {
 					submit.val("Send").prop("disabled",true);
 				}
 			}
+
 			if(mode == "stop") {
 				clearInterval(Chat.autoupdateloop);
 				submit.prop("disabled",false);
-				if(messagebox.val().length == 0)
+				if(messagebox.val().length == 0) // Fix the submit button text situationally
 					submit.val("Update");
+
 				else
 					submit.val("Send");
 			}
@@ -44,22 +50,22 @@ $(document).ready(function() {
 
 // ### Page update method
 		update: function(mode) { 
-			dfd = new $.Deferred;
+
 			Chat.mode = mode;
+
 			// Grab the id of the last seen message
 			Chat.lastseen = chatarea.find('li:last-child').data('msgid') || -1;
+
 			var nick = $('input.nick').val(),
 				message = $('input.message').val();
-			Chat.message = message;	
-			if(mode == "unload") {
-				Chat.update(nick, message, lastseen, mode);
-				return;
-			}	
+
+			Chat.message = message;	// Make the message accessible to other methods
 
 			if(nick == "" && Chat.lastseen == -1) {
 				Chat.register();
 			}
-			else
+
+			else // Remove the registration form if it is showing
 				$('form#register').remove();
 
 			if(message.length == 0 || mode == "auto") // If there is no message, just update the page
@@ -74,6 +80,7 @@ $(document).ready(function() {
 				window.myMessages.push(message); // Add the message to our history
 			}
 
+			// Send the request to the server; initiate insertion when done
 			this.chat = Chat.send(nick, message, Chat.lastseen, mode).done(this.insert);
 			
 		},
@@ -81,8 +88,8 @@ $(document).ready(function() {
 // ### Message insertion method			
 		insert: function(response) {
 
-			if(response.errors.nick) {
-				nickbox.val("");
+			if(response.errors.nick) { // If the AJAX request returned any errors...
+				nickbox.val(""); 
 				// alert(response.errors.nick);
 				return false;
 			}
@@ -90,11 +97,12 @@ $(document).ready(function() {
 			// Get the date of the last message seen before updating
 			lastdate = response.msgs[0].timestamp.split(" ")[0]; 
 			response.msgs.splice(0,1); // Remove the message from the array
-
+			
 			$.each(response.msgs, function(index, message) { // Iterate over the messages
-				var datetime = message.timestamp.split(" "),
+				var datetime = message.timestamp.split(" "), // Split date and time
 				date = datetime[0],
-				time = datetime[1],
+				time = datetime[1];
+
 				li = Chat.buildLine(message.message,time,message.nick,message.id);
 				// Build the message <li> and add it to the page	
 				chatarea.children('ul').append(li);
@@ -109,42 +117,47 @@ $(document).ready(function() {
 
 			topic = $('header#topic');
 			if(topic.text() != response.topic.topic) { // If the topic text has changed...
-				$('header#topic').text(response.topic.topic); // Update the topic
-				if(Chat.lastseen != -1) { // Add a topic change message to the chat stream
+				$('header#topic').text(response.topic.topic); // Update the topic ...
+
+				if(Chat.lastseen != -1) { // ... and add a topic change message to the chat stream (unless the page is currently blank)
 					topicmsg = Chat.buildLine("changed the topic to \”"+response.topic.topic+"\"",
 											  response.topic.timestamp.split(" ")[1], response.topic.setby,
 											  lastmsgid, "status");
 					chatarea.children('ul').append(topicmsg);
 				}
 			}
-			if(Chat.mode != "auto") {
+
+			if(Chat.mode != "auto") { // If we aren't auto-refreshing
 				submit.val("Update"); // Reset the submit button text
-				chatarea.prop('scrollTop',chatarea.prop('scrollHeight'));
-				if(Chat.message != "") {
+				chatarea.prop('scrollTop',chatarea.prop('scrollHeight')); // Scroll to the bottom
+				if(Chat.message != "") { // Clear the message input box after submission
 					messagebox.val("");
 				}
 			}
-			if(Chat.lastseen == -1) {
+			if(Chat.lastseen == -1) { // Remove the loading screen and show the content on page load
 				$('body').children().show();
 				$('div.loading').remove();	
 			}
 		},
 
+// ### Chat line builder method
 		buildLine: function(message,time,nick,id,liclass) {
 			li = $('<li />').attr("data-msgid", id);
 			$('<span />', { text: nick }).addClass("nick").prependTo(li);
 			$('<span />', { text: time } ).addClass("time").prependTo(li);
 			$('<p />', { text: message }).appendTo(li);	
 
-			if(liclass != undefined)
+			if(liclass != undefined) // Add a class to the li if we sent one as an argument
 				li.addClass(liclass);
 
 			return li;
 		},
 
+// ### Chat registration/login method
 		register: function() {
-			forms = $('form').add('#autoupdate').hide();
-			regform = $('form#register');
+			var forms = $('form').add('#autoupdate').hide(),
+				regform = $('form#register');
+
 			regform.show().children('.submit').on('click', function(e) {
 				e.preventDefault();
 				nick = $('input.regnick').val();
@@ -230,9 +243,10 @@ $(document).ready(function() {
 		}
 	});
 
-	$(window).on('unload', function() { // Delete session on leaving
+// ### Delete session on browser/tab close or leaving the page
+	$(window).on('unload', function() { 
 		$.ajax({
-			async: false,
+			async: false, // Needed to make the request fire
 			data: { mode:  "unload" }
 		});
 	});
