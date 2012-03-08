@@ -204,7 +204,6 @@ $(document).ready(function() {
 
 				else {
 					$(this).parent().hide();
-					$('div.loading').show();
 					$('input.nick').val(nick);
 					if($('input.autobox').prop('checked') == true) 
 						Chat.autoupdate("start");
