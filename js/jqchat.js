@@ -137,7 +137,7 @@ $(document).ready(function() {
 					message = "";
 				}					
 			}
-			console.log(message);
+			// console.log(message);
 			if(message == "/names") {
 				nicklist = Chat.nicks.slice(0); // Copy the nicklist
 				nicklist.push(nick);
