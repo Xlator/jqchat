@@ -137,8 +137,17 @@ $(document).ready(function() {
 					message = "";
 				}					
 			}
+			console.log(message);
+			if(message == "/names") {
+				nicklist = Chat.nicks.slice(0); // Copy the nicklist
+				nicklist.push(nick);
+				nicklist.sort();
+				$('<li />').text("Users: "+nicklist.join(", ")).addClass("status").appendTo('#chatarea ul');
+				chatarea.scrollBottom();
+				message = "";
+			}
 
-			if(message.split(" ")[0] in ['/quit','/join',]) {
+			if(message.split(" ")[0] in ['/quit','/join','/names']) {
 				message = "";
 			}
 
