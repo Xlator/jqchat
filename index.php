@@ -9,10 +9,6 @@
 	<!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 </head>
 <body>
-	<div id=autoupdate>
-	    <input type="checkbox" class="autobox" name="autoupdate" />
-		<label for="autoupdate">Auto-refresh?</label>
-	</div>
 	<header id="topic"></header>
 	<div id="chatarea">
 	<div class=loading></div>

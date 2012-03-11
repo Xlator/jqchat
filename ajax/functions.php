@@ -1,4 +1,3 @@
-
 <?php
 
 /* --------- Database connection/query helper functions --------- */
@@ -83,11 +82,16 @@ function validateNick($nick) { // Takes a nick, returns true if valid, else fals
 }
 
 function getNicks() { // Returns array of nicks (except our own)
-	$nicksresult = dbResultArray("SELECT nick FROM sessions WHERE sessionid != '".session_id()."'");
+	global $sessid;
+	$nicksresult = dbResultArray("SELECT nick FROM sessions WHERE sessionid != '$sessid'");
 	$nicks = array();
 	foreach($nicksresult as $n)
 		$nicks[] = $n['nick'];
 	return $nicks;
+}
+
+function getTopic() {
+	return dbResultArray("SELECT * FROM topic ORDER BY timestamp DESC LIMIT 0,1");
 }
 
 function nickAvailable($nick) { // Takes nick and nick list, returns true if our chosen nick is available
@@ -95,39 +99,60 @@ function nickAvailable($nick) { // Takes nick and nick list, returns true if our
 }
 
 function sessionExists($sessionid) {
-	return (bool) dbFirstResult("SELECT nick FROM sessions WHERE sessionid='$sessionid'");
+	return dbResultExists("SELECT nick FROM sessions WHERE sessionid='$sessionid'");
 }
 
 function updateSession($nick) { // Takes nick, registers or updates session in db and $_SESSION
-	if(!sessionExists(session_id())) 
-		dbQuery("INSERT INTO sessions (sessionid, nick) VALUES ('".session_id()."','$nick')");
-	
-	else 
-		dbQuery("UPDATE sessions SET nick='$nick' WHERE sessionid='".session_id()."'");
-	
-	$_SESSION['nick'] = $nick;
+	global $sessid;
+	if(!sessionExists($sessid))
+		dbQuery("INSERT INTO sessions (sessionid, nick, regtime) VALUES ('$sessid','$nick',CURRENT_TIMESTAMP())");
 }
+	
 
 function removeSession() {
-	return (bool) dbQuery("DELETE FROM sessions WHERE sessionid='".session_id()."'");
+	$sessionid = session_id();
+	// Insert a quit message
+	dbQuery("INSERT INTO chatlog (nick, type) 
+			 SELECT nick, 'quit' FROM sessions WHERE sessionid = '$sessionid'");
+	return (bool) dbQuery("DELETE FROM sessions WHERE sessionid='$sessionid'");
 }
 
-function getMsgs($lastseen) { // Takes the ID of the last seen post, returns array of posts (including last seen for comparison purposes)
-
-// If the log was empty, insert a blank row to avoid losing the first result when comparing dates.
-	if($lastseen == -1) 
-		$blank = "UNION SELECT '','','',''";
-	else
-		$blank = "";
-
-	return dbResultArray("SELECT * FROM (
-		SELECT * FROM chatlog WHERE id >= $lastseen ORDER BY id DESC LIMIT 0,".MAX_POSTS."
-	) AS x $blank ORDER BY id ASC"); // Only select the last MAX_POSTS posts (defined in config.php)
+function getMsgs($lastseen) { // Takes the ID of the last seen post, returns array of posts 
+	return dbResultArray("SELECT * FROM chatlog WHERE id > $lastseen");
 }
 
 function postMsg($nick, $message) {
-	if(preg_match("#^/topic (.*)#", $message, $topic)) 
-		return dbQueryId("INSERT INTO topic (topic, setby) VALUES ('$topic[1]','$nick')");
-		
-	return dbQueryId("INSERT INTO chatlog (nick, message) VALUES ('$nick','$message')");	
+	$type = "message";
+	if(preg_match("#^/topic (.*)#", $message, $topic)) {
+		$type = "topic";
+		$message = $topic[1];
+	}
+
+	if(preg_match("#^/me (.*)#", $message, $emote)) {
+		$type = "emote";
+		$message = $emote[1];
+	}
+
+	if(preg_match("#^/nick (.*)#", $message, $newnick)) {
+		$type = "nick";
+		$message = $newnick[1];
+	}
+
+	// If the date has changed since the last post, insert a message of type 'date' into the chatlog
+	if(dbResultExists("SELECT * FROM (SELECT timestamp FROM chatlog ORDER BY timestamp DESC LIMIT 0,1) x WHERE DATE(timestamp) != CURDATE()"))
+		dbQuery("INSERT INTO chatlog (type) VALUES ('date')");
+
+	dbQuery("INSERT INTO chatlog (nick, message, type) VALUES ('$nick','$message','$type')");
+}
+
+function downstream($lastseen) {
+	$starttime = time();
+	while(time() - $starttime < 10) {
+		$result = getMsgs($lastseen);
+		if(!empty($result)) {
+			print json_encode(array("msgs" => $result, "nicks" => getNicks(), "topic" => getTopic()));
+			die();
+		}
+		usleep(30000);
+	}
 }
