@@ -308,7 +308,7 @@ $(document).ready(function() {
 			}
 
 			if(e.keyCode == 40) { // Down arrow
-				if(window.myMsgIndex != window.myMessages.length-1) {
+				if(window.myMsgIndex != window.myMessages.length) {
 					myMsgIndex++; // Get next message id
 					messagebox.val(window.myMessages[window.myMsgIndex]);
 				}

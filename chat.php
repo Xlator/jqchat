@@ -15,6 +15,7 @@ if(isset($_POST['mode']) && $_POST['mode'] == "unload") {
 	session_destroy();	
 	die();
 }
+
 $errors = array();
 $nicks = array();
 $newmsgs = array();
