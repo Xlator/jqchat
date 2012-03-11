@@ -10,6 +10,14 @@ In-chat commands:
 /names - Get a list of active users
 /me says hi - Send an emote (* SomeUser says hi)
 
+NOTE:
+When developing this application, I came across a bug in MySQL which is likely
+to affect XAMPP users, but shouldn't bother you if you have a well configured
+MySQL server. If you cannot send messages, check your my.cnf file.  The
+"thread_stack" option should be set to at least 192K. This is due to a bug in
+the way MySQL handles triggers, which I used to update the sessions table when
+a user changes their nick.
+
 TODO:
 Nick registration/reservation (like authing to the service bot on your IRC network)
 Multiple channels
