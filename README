@@ -1,0 +1,17 @@
+jqchat - IRC-like jQuery chat with PHP/MySQL backend
+
+Installation:
+Create a database and import jqchat.sql
+Copy ajax/config.dist.php to ajax/config.php and enter your database settings
+
+In-chat commands:
+/nick SomeUser - Change nick to SomeUser
+/topic Something Something Something - Change topic
+/names - Get a list of active users
+/me says hi - Send an emote (* SomeUser says hi)
+
+TODO:
+Nick registration/reservation (like authing to the service bot on your IRC network)
+Multiple channels
+Highlighting
+Nick completion in messages
