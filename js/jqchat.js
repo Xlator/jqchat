@@ -144,7 +144,9 @@ $(document).ready(function() {
 
 			if (message != "" && message.trim() != "") {
 				Chat.message = message;	// Make the message accessible to other methods
+				Chat.myMessages.push(message);
 				Chat.send(nick, message);
+
 			}
 			messagebox.val("");
 			
@@ -227,7 +229,7 @@ $(document).ready(function() {
 					if(Chat.conditionSwitch[i] == condition) {	
 
 						if(action == "off") {
-							console.log("Submit conditions: " +condition + " off");
+							// console.log("Submit conditions: " +condition + " off");
 							Chat.conditionSwitch.remove(i);
 							if(Chat.conditionSwitch.length == 0)
 								submit.prop('disabled', false);
@@ -235,20 +237,20 @@ $(document).ready(function() {
 						}
 
 						else if(action == "on") {
-							console.log("Submit conditions: " +condition + " already on");
+							// console.log("Submit conditions: " +condition + " already on");
 							return false;
 						}
 					}
 				}
 			}
 			if(action == "on") {
-				console.log("Submit conditions: " +condition + " on");
+				// console.log("Submit conditions: " +condition + " on");
 				Chat.conditionSwitch.push(condition);
 				submit.prop('disabled',true);
 				return true;
 			}
 			else if(action == "off") {
-				console.log("Submit conditions: " +condition + " already off");
+				// console.log("Submit conditions: " +condition + " already off");
 				return false;
 			}
 		},
@@ -276,7 +278,7 @@ $(document).ready(function() {
 	});
 	
 	messagebox.on('keyup', function() { // Change submit button text when a message is entered
-		console.log($(this).val().trim());
+		// console.log($(this).val().trim());
 		if($(this).val().trim().length > 0) { 
 			Chat.submitConditions("noTextAuto", "off");
 		}
@@ -287,19 +289,20 @@ $(document).ready(function() {
 
 	.on('keydown', function(e) { // Allows browsing through message history with up/down arrows
 
-		if(myMessages.length != 0) {
+		if(Chat.myMessages.length != 0) {
+
 			if(e.keyCode == 38) { // Up arrow
-				if(myMsgIndex == -1) 
-					window.myMsgIndex = window.myMessages.length; // Get last message id
-				else if(myMsgIndex != 0)
-					myMsgIndex--; // Move back in the message history
-				messagebox.val(window.myMessages[window.myMsgIndex]); // Insert message into message input
+				if(Chat.myMsgIndex == -1) 
+					Chat.myMsgIndex = Chat.myMessages.length-1; // Get last message id
+				else if(Chat.myMsgIndex != 0)
+					Chat.myMsgIndex--; // Move back in the message history
+				messagebox.val(Chat.myMessages[Chat.myMsgIndex]); // Insert message into message input
 			}
 
 			if(e.keyCode == 40) { // Down arrow
-				if(window.myMsgIndex != window.myMessages.length) {
-					myMsgIndex++; // Get next message id
-					messagebox.val(window.myMessages[window.myMsgIndex]);
+				if(Chat.myMsgIndex != Chat.myMessages.length) {
+					Chat.myMsgIndex++; // Get next message id
+					messagebox.val(Chat.myMessages[Chat.myMsgIndex]);
 				}
 				else 
 					messagebox.val(""); // Clear the input when we go past the end of the history
@@ -337,7 +340,7 @@ $(document).ready(function() {
 	chatarea.on('scroll', function() {
 		$this = $(this);
 		Chat.autoscroll = Boolean($this.scrollTop() > $this.prop('scrollHeight') - $this.height() - 25);
-		console.log(Chat.autoscroll);
+		// console.log(Chat.autoscroll);
 	});
 
 // ### Delete session on browser/tab close or leaving the page
