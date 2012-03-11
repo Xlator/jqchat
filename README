@@ -1,4 +1,5 @@
 jqchat - IRC-like jQuery chat with PHP/MySQL backend
+Demo @ http://xlator.htn.se/webh/jqchat
 
 Installation:
 Create a database and import jqchat.sql
