@@ -24,7 +24,7 @@
 	<form id=chatcontrols>
 		<input type="text" class="nick" placeholder="Nickname" name="nick" />
 		<input type="text" class="message" placeholder= "Your message" />
-		<input type="submit" class="submit" value="Update" />
+		<input type="submit" class="submit" value="Send" />
 	</form>
 	
 <div id=nickerrors>

@@ -95,7 +95,8 @@ function getTopic() {
 }
 
 function nickAvailable($nick) { // Takes nick and nick list, returns true if our chosen nick is available
-	return !dbResultExists("SELECT nick FROM sessions WHERE nick = '$nick' AND sessionid !='".session_id()."'");
+	global $sessid;
+	return !dbResultExists("SELECT nick FROM sessions WHERE nick = '$nick' AND sessionid !='$sessid'");
 }
 
 function sessionExists($sessionid) {
@@ -136,18 +137,22 @@ function postMsg($nick, $message) {
 	if(preg_match("#^/nick (.*)#", $message, $newnick)) {
 		$type = "nick";
 		$message = $newnick[1];
+		var_dump(validateNick($message));
+		var_dump(nickAvailable($message));
 	}
+		
+	if(!isset($error)) {
+		// If the date has changed since the last post, insert a message of type 'date' into the chatlog
+		if(dbResultExists("SELECT * FROM (SELECT timestamp FROM chatlog ORDER BY timestamp DESC LIMIT 0,1) x WHERE DATE(timestamp) != CURDATE()"))
+			dbQuery("INSERT INTO chatlog (type) VALUES ('date')");
 
-	// If the date has changed since the last post, insert a message of type 'date' into the chatlog
-	if(dbResultExists("SELECT * FROM (SELECT timestamp FROM chatlog ORDER BY timestamp DESC LIMIT 0,1) x WHERE DATE(timestamp) != CURDATE()"))
-		dbQuery("INSERT INTO chatlog (type) VALUES ('date')");
-
-	dbQuery("INSERT INTO chatlog (nick, message, type) VALUES ('$nick','$message','$type')");
+		dbQuery("INSERT INTO chatlog (nick, message, type) VALUES ('$nick','$message','$type')");
+	}
 }
 
 function downstream($lastseen) {
 	$starttime = time();
-	while(time() - $starttime < 10) {
+	while(time() - $starttime < 30) {
 		$result = getMsgs($lastseen);
 		if(!empty($result)) {
 			print json_encode(array("msgs" => $result, "nicks" => getNicks(), "topic" => getTopic()));

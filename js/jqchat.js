@@ -77,6 +77,7 @@ $(document).ready(function() {
 					Chat.register(nick);
 					$('form#register').hide();
 					$('form#chatcontrols').show();
+					Chat.submitConditions("noTextAuto","on");
 					Chat.poll();
 				}
 			});
@@ -129,19 +130,23 @@ $(document).ready(function() {
 		  		message = $('input.message').val(),
 		 		nickchange = message.match(/^\/nick (.*)/);
 			
-		 	if(nickchange != null)
-		 		nickbox.val(nickchange[1]);
+		 	if(nickchange != null) {
+				if(nickchange[1].validateNick() && nickchange[1].nickAvailable() && nickchange[1] != nick)
+					nickbox.val(nickchange[1]);
+				else {
+					message = "";
+				}					
+			}
 
 			if(message.split(" ")[0] in ['/quit','/join',]) {
-				messagebox.val("");
 				message = "";
 			}
 
-			else {
+			if (message != "" && message.trim() != "") {
 				Chat.message = message;	// Make the message accessible to other methods
 				Chat.send(nick, message);
-				messagebox.val("");
 			}
+			messagebox.val("");
 			
 		 },
 
@@ -197,28 +202,6 @@ $(document).ready(function() {
 			if(Chat.autoscroll)
 				chatarea.scrollBottom();
 		},
-		// 		if(date != lastdate) { // If the date has changed, add an extra li with a status message
-		// 			$('<li />', { text: "Day changed to " + date }).addClass("date").insertBefore(li);	
-		// 		}
-
-		// 		lastdate=date; // Update the lastdate
-		// 		lastmsgid=message.id // Cache the id of the message
-		// 	});
-
-
-		// 	// if(Chat.mode != "auto") { // If we aren't auto-refreshing
-		// 	// 	submit.val("Update"); // Reset the submit button text
-		// 	// 	// chatarea.prop('scrollTop',chatarea.prop('scrollHeight')); // Scroll to the bottom
-		// 	// 	if(Chat.message != "") { // Clear the message input box after submission
-		// 	// 		messagebox.val("");
-		// 	// 	}
-		// 	// 	chatarea.scrollBottom();
-		// 	// }
-		// 	// if(Chat.lastseen == -1) { // Remove the loading screen and show the content on page load
-		// 	// 	$('body').children().show();
-		// 	// 	$('div.loading').remove();	
-		// 	// }
-
 
 // // ### Chat line builder method
 		buildLine: function(message,time,nick,id,liclass) {
@@ -235,37 +218,6 @@ $(document).ready(function() {
 					li.addClass(liclass);
 			return li;
 		},
-
-// // ### Chat registration/login method
-		// register: function() {
-		// 	Chat.send().done(function(response) { Chat.nicks = response.nicks; })
-
-		// 	var forms = $('form#chatcontrols').hide(),
-		// 		regform = $('form#register');
-		// 	$('label.regerror').hide();
-		// 	regform.show().children('.regsubmit').on('click', function(e) {
-		// 		e.preventDefault();
-		// 		nick = $('input.regnick').val();
-
-		// 		if(!nick.validateNick()) {
-		// 			$('label.regerror').hide();
-		// 			$('label[name=regInvalidNick]').show();
-		// 		}	
-
-		// 		else if(!nick.nickAvailable()) {
-		// 			$('label.regerror').hide();
-		// 			$('label[name=regNickTaken]').show();
-		// 		}
-
-		// 		else {
-		// 			$(this).parent().hide();
-		// 			$('input.nick').val(nick);
-		// 			if($('input.autobox').prop('checked') == true) 
-		// 				Chat.poll();
-		// 			forms.show();	
-		// 		}
-		// 	});
-		// },
 		
 		submitConditions: function(condition, action) {
 			if(!Chat.conditionSwitch) { Chat.conditionSwitch = new Array; }
@@ -314,44 +266,25 @@ $(document).ready(function() {
 	$('span.nickerror').hide();
 		
 	// Message history for this session
-	window.myMessages = new Array;
-	window.myMsgIndex = -1;
+	Chat.myMessages = new Array;
+	Chat.myMsgIndex = -1;
 
 	
-	// if(autobox.prop('checked') == true)
-	// 	Chat.autoupdate("start");
-	
-	// else
-	// 	Chat.update();
-
-	// autobox.on('click', function(e) {
-	// 	if($(this).prop('checked') == true) {
-	// 		Chat.autoupdate("start");
-	// 	}
-	// 	else
-	// 		Chat.autoupdate("stop");
-	// });
-
 	submit.on('click', function (e) {
 		e.preventDefault();
 		Chat.update(); // Send our message (if any) and update the page
 	});
 	
 	messagebox.on('keyup', function() { // Change submit button text when a message is entered
-
-		if($(this).val().length > 0) { 
-			submit.val("Send"); 
-			if(autobox.prop('checked') == true) {
-				Chat.submitConditions("noTextAuto", "off");
-			}
+		console.log($(this).val().trim());
+		if($(this).val().trim().length > 0) { 
+			Chat.submitConditions("noTextAuto", "off");
 		}
 		else { 
-			if(autobox.prop('checked') == true) {
-				Chat.submitConditions("noTextAuto", "on");
-			}
-			else {submit.val("Update"); }
+			Chat.submitConditions("noTextAuto", "on");
 		}
 	})
+
 	.on('keydown', function(e) { // Allows browsing through message history with up/down arrows
 
 		if(myMessages.length != 0) {
@@ -376,8 +309,8 @@ $(document).ready(function() {
 	});
 	
 	nickbox.on('focus', function(e) {
-		Chat.oldnick = $(this).val(); // Store old nick to revert to if new is invalid
-		console.log(Chat.oldnick);
+		if($(this).val().validateNick() && $(this).val().nickAvailable())
+			Chat.lastvalidnick = $(this).val(); // Store the last valid nick
 	})
 	.on('blur', function(e) {
 		$this = $(this);
@@ -395,7 +328,8 @@ $(document).ready(function() {
 		else {
 			$this.removeClass("invalidNick");
 			Chat.submitConditions("invalidNick", "off");
-			Chat.send(Chat.oldnick, '/nick '+$this.val());
+			if($this.val() != Chat.lastvalidnick) 
+				Chat.send(Chat.lastvalidnick, '/nick '+$this.val());
 		}
 	});
 
