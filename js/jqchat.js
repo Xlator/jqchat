@@ -165,7 +165,7 @@ $(document).ready(function() {
 						rownick = "";
 						break;
 					case "nick":
-						rowtext = "is now known as " + message.text;
+						rowtext = "is now known as " + message.message;
 						break;
 					case "topic":
 						rowtext = "changed the topic to \”"+message.message+"\"";
@@ -194,6 +194,8 @@ $(document).ready(function() {
 				// Build the message <li> and add it to the page	
 				chatarea.children('ul').append(li);
 			});
+			if(Chat.autoscroll)
+				chatarea.scrollBottom();
 		},
 		// 		if(date != lastdate) { // If the date has changed, add an extra li with a status message
 		// 			$('<li />', { text: "Day changed to " + date }).addClass("date").insertBefore(li);	
@@ -217,9 +219,6 @@ $(document).ready(function() {
 		// 	// 	$('div.loading').remove();	
 		// 	// }
 
-		// 	if(Chat.autoscroll)
-		// 		chatarea.scrollBottom();
-		// },
 
 // // ### Chat line builder method
 		buildLine: function(message,time,nick,id,liclass) {
@@ -404,6 +403,7 @@ $(document).ready(function() {
 	chatarea.on('scroll', function() {
 		$this = $(this);
 		Chat.autoscroll = Boolean($this.scrollTop() > $this.prop('scrollHeight') - $this.height() - 25);
+		console.log(Chat.autoscroll);
 	});
 
 // ### Delete session on browser/tab close or leaving the page
