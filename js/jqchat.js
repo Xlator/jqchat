@@ -275,8 +275,6 @@ $(document).ready(function() {
 		autobox = $('div#autoupdate').children('input[type=checkbox]'),
 		chatarea = $('div#chatarea');
 
-	nickbox[0].focus();
-	
 	$('span.nickerror').hide();
 		
 	// Message history for this session
