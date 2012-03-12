@@ -18,7 +18,7 @@ Array.prototype.remove = function(from, to) {
 	this.length = from < 0 ? this.length + from : from;
 	return this.push.apply(this, rest);
 }
-//blah
+
 $(document).ready(function() {
 // Set up defaults for AJAX requests
 	$.ajaxSetup({
@@ -55,11 +55,15 @@ $(document).ready(function() {
 
 // ### Show and handle the registration form
 		regform: function() {
+			// focus the nick input upon page load
+			var nickreginput = $('input.regnick');
+			nickreginput[0].focus();
+			
 			$('form#chatcontrols').hide(); // Hide the chat form
 			$('form#register').show().children("label").hide().end()
 			.children(".regsubmit").on("click", function(e) {
 				e.preventDefault();
-				nick = $('input.regnick').val();
+				nick = nickreginput.val();
 
 				if(!nick.validateNick()) {
 					$('label.regerror').hide();
