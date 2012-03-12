@@ -18,7 +18,7 @@ Array.prototype.remove = function(from, to) {
 	this.length = from < 0 ? this.length + from : from;
 	return this.push.apply(this, rest);
 }
-
+//blah
 $(document).ready(function() {
 // Set up defaults for AJAX requests
 	$.ajaxSetup({
@@ -274,8 +274,6 @@ $(document).ready(function() {
 		submit = $('input.submit'),
 		autobox = $('div#autoupdate').children('input[type=checkbox]'),
 		chatarea = $('div#chatarea');
-
-	nickbox[0].focus();
 	
 	$('span.nickerror').hide();
 		
