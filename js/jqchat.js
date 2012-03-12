@@ -274,6 +274,8 @@ $(document).ready(function() {
 		submit = $('input.submit'),
 		autobox = $('div#autoupdate').children('input[type=checkbox]'),
 		chatarea = $('div#chatarea');
+
+	nickbox[0].focus();
 	
 	$('span.nickerror').hide();
 		
