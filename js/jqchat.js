@@ -78,6 +78,7 @@ $(document).ready(function() {
 					$('form#register').hide();
 					$('form#chatcontrols').show();
 					Chat.submitConditions("noTextAuto","on");
+					messagebox.focus();
 					Chat.poll();
 				}
 			});

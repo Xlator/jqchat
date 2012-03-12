@@ -90,7 +90,7 @@ function getNicks() { // Returns array of nicks (except our own)
 	return $nicks;
 }
 
-function getTopic() {
+function getTopic() { // Returns the latest topic as an array
 	return dbResultArray("SELECT * FROM topic ORDER BY timestamp DESC LIMIT 0,1");
 }
 
@@ -99,7 +99,7 @@ function nickAvailable($nick) { // Takes nick and nick list, returns true if our
 	return !dbResultExists("SELECT nick FROM sessions WHERE nick = '$nick' AND sessionid !='$sessid'");
 }
 
-function sessionExists($sessionid) {
+function sessionExists($sessionid) { // Returns true if session exists in db, otherwise false
 	return dbResultExists("SELECT nick FROM sessions WHERE sessionid='$sessionid'");
 }
 
@@ -110,7 +110,7 @@ function updateSession($nick) { // Takes nick, registers or updates session in d
 }
 	
 
-function removeSession() {
+function removeSession() { // Removes a session from the db (used on closing/leaving the page), returns true on success
 	$sessionid = session_id();
 	// Insert a quit message
 	dbQuery("INSERT INTO chatlog (nick, type) 
@@ -122,7 +122,7 @@ function getMsgs($lastseen) { // Takes the ID of the last seen post, returns arr
 	return dbResultArray("SELECT * FROM chatlog WHERE id > $lastseen");
 }
 
-function postMsg($nick, $message) {
+function postMsg($nick, $message) { // Posts a message to the chatlog
 	$type = "message";
 	if(preg_match("#^/topic (.*)#", $message, $topic)) {
 		$type = "topic";
@@ -150,9 +150,9 @@ function postMsg($nick, $message) {
 	}
 }
 
-function downstream($lastseen) {
+function downstream($lastseen) { // Long polling function; polls db, sleeps for 30 ms if no new data is found, then loops.
 	$starttime = time();
-	while(time() - $starttime < 30) {
+	while(time() - $starttime < EXECTIME) {
 		$result = getMsgs($lastseen);
 		if(!empty($result)) {
 			print json_encode(array("msgs" => $result, "nicks" => getNicks(), "topic" => getTopic()));
