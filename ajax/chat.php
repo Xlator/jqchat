@@ -14,10 +14,10 @@ if(isset($_POST['mode']) && $_POST['mode'] == "unload") {
 else
 	session_write_close();
 
-$headers = getallheaders();  
-if(!isset($headers["X-Requested-With"]) || $headers["X-Requested-With"] != "XMLHttpRequest") {  
-	die(); 
-} 
+// $headers = apache_request_headers();  
+// if(!isset($headers["X-Requested-With"]) || $headers["X-Requested-With"] != "XMLHttpRequest") {  
+// 	die(); 
+// } 
 if(isset($_POST['mode'])) { 
 	switch($_POST['mode']) {
 	case "init": 

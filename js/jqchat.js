@@ -55,11 +55,13 @@ $(document).ready(function() {
 
 // ### Show and handle the registration form
 		regform: function() {
+			var nickreginput = $('input.regnick');
+
 			$('form#chatcontrols').hide(); // Hide the chat form
 			$('form#register').show().children("label").hide().end()
 			.children(".regsubmit").on("click", function(e) {
 				e.preventDefault();
-				nick = $('input.regnick').val();
+				nick = nickreginput.val();
 
 				if(!nick.validateNick()) {
 					$('label.regerror').hide();
@@ -82,6 +84,9 @@ $(document).ready(function() {
 					Chat.poll();
 				}
 			});
+
+			// Focus nick input upon page load
+			nickreginput[0].focus();
 		},
 
 // ### Long polling method
